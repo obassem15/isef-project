@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETA - Advanced Emergency Traffic Aid</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #312e81 50%, #581c87 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            padding: 1rem;
+            border-radius: 1rem;
+            font-size: 2rem;
+        }
+
+        .title h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .title p {
+            font-size: 0.9rem;
+            color: #d1d5db;
+        }
+
+        .authors {
+            text-align: left;
+        }
+
+        .authors p:first-child {
+            font-size: 0.9rem;
+            color: #d1d5db;
+        }
+
+        .authors p:last-child {
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 2rem;
+        }
+
+        .progress-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .progress-item {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .progress-item.active {
+            background: #3b82f6;
+        }
+
+        .progress-item.completed {
+            background: #1e40af;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .slide-header {
+            background: linear-gradient(135deg, var(--color-start), var(--color-end));
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .slide-header-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .slide-icon {
+            font-size: 3rem;
+        }
+
+        .slide-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .slide-category {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.3rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .slide-number {
+            text-align: left;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .slide-content {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 2rem;
+            min-height: 500px;
+        }
+
+        .content-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 2px solid;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.8rem;
+        }
+
+        .card-text {
+            color: #d1d5db;
+            line-height: 1.6;
+        }
+
+        .road-simulation {
+            position: relative;
+            background: rgba(31, 41, 55, 0.5);
+            border-radius: 1rem;
+            padding: 2rem;
+            height: 500px;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .main-road {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 100%;
+            background: #374151;
+            display: flex;
+        }
+
+        .lane {
+            flex: 1;
+            border-left: 3px solid #fbbf24;
+            border-right: 3px solid #fbbf24;
+            position: relative;
+        }
+
+        .lane-marker {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 50px;
+            background: white;
+        }
+
+        .curve-road {
+            position: absolute;
+            left: calc(50% + 100px);
+            top: 25%;
+            width: 120px;
+            height: 50%;
+        }
+
+        .curve-path {
+            stroke-dasharray: 10, 5;
+            transition: stroke 0.5s;
+        }
+
+        .gate {
+            position: absolute;
+            left: calc(50% + 100px);
+            top: 25%;
+            height: 50%;
+            width: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .gate-bar {
+            width: 8px;
+            height: 100%;
+            background: #dc2626;
+            border-radius: 10px;
+            transition: all 1s;
+        }
+
+        .gate-bar.open {
+            height: 0;
+            background: transparent;
+        }
+
+        .gate-label {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 0.3rem 0.8rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            top: -30px;
+        }
+
+        .car {
+            position: absolute;
+            width: 30px;
+            height: 40px;
+            background: #60a5fa;
+            border-radius: 8px 8px 3px 3px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .car::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .car.in-curve {
+            background: #34d399;
+        }
+
+        .ambulance {
+            position: absolute;
+            width: 35px;
+            height: 50px;
+            background: #ef4444;
+            border-radius: 8px 8px 3px 3px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+            animation: pulse 0.5s infinite;
+        }
+
+        .ambulance::before {
+            content: '🚑';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+        }
+
+        .ambulance-label {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ef4444;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .arrow-indicator {
+            position: absolute;
+            left: calc(50% + 130px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.8rem;
+            display: none;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: bold;
+            animation: bounce 1s infinite;
+            z-index: 15;
+        }
+
+        .arrow-indicator.show {
+            display: flex;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-50%) translateX(0); }
+            50% { transform: translateY(-50%) translateX(10px); }
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 0.8rem;
+            border: 2px solid;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #d1d5db;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+
+        .metric-unit {
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 0.8rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f59e0b, #dc2626);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .nav-btn {
+            padding: 0.8rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.8rem;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            width: 32px;
+            border-radius: 6px;
+            background: #3b82f6;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 0.8rem;
+            border: 2px solid;
+        }
+
+        .info-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-text {
+            font-size: 0.9rem;
+            color: #d1d5db;
+        }
+
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .sensor-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sensor-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+            font-weight: bold;
+        }
+
+        .sensor-value {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .sensor-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .sensor-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s, background 0.3s;
+        }
+
+        .reference-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .reference-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 0.8rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .reference-authors {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .reference-title {
+            color: #93c5fd;
+            margin-bottom: 0.5rem;
+        }
+
+        .reference-details {
+            font-size: 0.9rem;
+            color: #9ca3af;
+        }
+
+        .reference-link {
+            display: inline-block;
+            margin-top: 0.5rem;
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        .reference-link:hover {
+            text-decoration: underline;
+        }
+
+        .list-item {
+            margin-bottom: 0.5rem;
+            color: #d1d5db;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">📊</div>
+            <div class="title">
+                <h1>نظام AETA</h1>
+                <p>Advanced Emergency Traffic Aid</p>
+            </div>
+        </div>
+        <div class="authors">
+            <p>تطوير:</p>
+            <p>Karas Basem & Omar Basem</p>
+        </div>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-container" id="progressBar"></div>
+    </div>
+
+    <div class="container">
+        <div class="slide-header" id="slideHeader" style="--color-start: #ef4444; --color-end: #f97316;">
+            <div class="slide-category" id="slideCategory">Problem</div>
+            <div class="slide-header-content">
+                <div class="slide-icon" id="slideIcon">⚠️</div>
+                <div class="slide-title" id="slideTitle">المشكلة</div>
+            </div>
+            <div class="slide-number" id="slideNumber">صفحة 1 من 8</div>
+        </div>
+
+        <div class="slide-content" id="slideContent"></div>
+
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="previousSlide()">
+                <span>◄</span>
+                <span>السابق</span>
+            </button>
+            <div class="nav-dots" id="navDots"></div>
+            <button class="nav-btn" id="nextBtn" onclick="nextSlide()">
+                <span>التالي</span>
+                <span>►</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        let isSimulating = false;
+        let simulationInterval = null;
+        let ambulancePosition = -10;
+        let ambulanceDistance = 500;
+        let ambulanceDisplacement = 0;
+        let gateOpen = false;
+        let cars = [
+            { id: 1, pos: 20, inCurve: false, curveProgress: 0 },
+            { id: 2, pos: 35, inCurve: false, curveProgress: 0 },
+            { id: 3, pos: 50, inCurve: false, curveProgress: 0 },
+            { id: 4, pos: 65, inCurve: false, curveProgress: 0 }
+        ];
+        let noiseLevel = 45;
+        let gasLevel = 120;
+
+        const slides = [
+            {
+                title: 'المشكلة',
+                category: 'Problem',
+                icon: '⚠️',
+                colors: { start: '#ef4444', end: '#f97316' },
+                content: `
+                    <h3 class="content-title">التحديات التي نواجهها</h3>
+                    <div class="grid grid-2">
+                        <div class="card" style="border-color: rgba(239, 68, 68, 0.5);">
+                            <div class="card-icon">🚑</div>
+                            <h4 class="card-title">تأخر الإسعافات</h4>
+                            <p class="card-text">الإسعافات بتتأخر في الزحمة وده بيسبب خطر على حياة المرضى ووقت الاستجابة بيزيد بشكل كبير</p>
+                        </div>
+                        <div class="card" style="border-color: rgba(249, 115, 22, 0.5);">
+                            <div class="card-icon">🚗</div>
+                            <h4 class="card-title">الازدحام المروري</h4>
+                            <p class="card-text">الزحمة الشديدة في الشوارع بتعطل حركة المرور وبتهدر وقت ووقود المواطنين</p>
+                        </div>
+                        <div class="card" style="border-color: rgba(168, 85, 247, 0.5);">
+                            <div class="card-icon">💨</div>
+                            <h4 class="card-title">التلوث البيئي</h4>
+                            <p class="card-text">الغازات السامة من العوادم بتزيد (CO, NOx) وبتضر البيئة وصحة المواطنين</p>
+                        </div>
+                        <div class="card" style="border-color: rgba(59, 130, 246, 0.5);">
+                            <div class="card-icon">⏱️</div>
+                            <h4 class="card-title">ضياع الوقت</h4>
+                            <p class="card-text">الوقت الضائع في الزحمة ممكن يكلف أرواح بشرية وده غير مقبول في حالات الطوارئ</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: 'الحلول السابقة',
+                category: 'Prior Solutions',
+                icon: '💡',
+                colors: { start: '#3b82f6', end: '#06b6d4' },
+                content: `
+                    <h3 class="content-title">محاولات سابقة لحل المشكلة</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="card" style="border-color: rgba(59, 130, 246, 0.5); border-left: 4px solid #3b82f6;">
+                            <h4 class="card-title">🤖 نظام OWENN الذكي</h4>
+                            <p class="card-text" style="margin-bottom: 0.8rem;">استخدام شبكات عصبية للتنبؤ بالازدحام ودقة 98.23%</p>
+                            <div style="font-size: 0.9rem; color: #93c5fd;">✓ دقة عالية | ✗ لا يتعامل مع الإسعافات</div>
+                        </div>
+                        <div class="card" style="border-color: rgba(6, 182, 212, 0.5); border-left: 4px solid #06b6d4;">
+                            <h4 class="card-title">🔊 كشف صوت الصفارة بالذكاء الاصطناعي</h4>
+                            <p class="card-text" style="margin-bottom: 0.8rem;">استخدام MFCC لتمييز صوت صفارة الإسعاف بدقة 90%</p>
+                            <div style="font-size: 0.9rem; color: #67e8f9;">✓ كشف فعال | ✗ لا يوجد تنفيذ عملي على الطريق</div>
+                        </div>
+                        <div class="card" style="border-color: rgba(168, 85, 247, 0.5); border-left: 4px solid #a855f7;">
+                            <h4 class="card-title">📍 أنظمة IoT للمراقبة</h4>
+                            <p class="card-text" style="margin-bottom: 0.8rem;">مستشعرات لمراقبة جودة الهواء وحركة المرور</p>
+                            <div style="font-size: 0.9rem; color: #c084fc;">✓ بيانات دقيقة | ✗ رد فعل بطيء</div>
+                        </div>
+                        <div class="card" style="border-color: rgba(234, 179, 8, 0.5); background: rgba(234, 179, 8, 0.2); margin-top: 1rem;">
+                            <p style="font-size: 1.3rem; font-weight: bold; text-align: center;">❌ المشكلة: كل الحلول دي منفصلة ومش متكاملة!</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: 'الحل المقترح - AETA',
+                category: 'Proposed Solution',
+                icon: '✨',
+                colors: { start: '#10b981', end: '#059669' },
+                content: `
+                    <h3 class="content-title">نظام AETA - Advanced Emergency Traffic Aid</h3>
+                    <div class="card" style="border-color: rgba(16, 185, 129, 0.5); background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.3)); margin-bottom: 2rem;">
+                        <p style="font-size: 1.3rem; text-align: center;">💡 نظام متكامل يجمع كل الحلول السابقة في نظام واحد ذكي!</p>
+                    </div>
+                    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 2rem;">
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 1rem; text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 0.8rem;">🔊</div>
+                            <h4 style="font-weight: bold; margin-bottom: 0.5rem;">كاشف الصفارة</h4>
+                            <p style="font-size: 0.9rem; color: #d1d5db;">يكتشف الإسعاف من مسافة 500 متر</p>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 1rem; text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 0.8rem;">📊</div>
+                            <h4 style="font-weight: bold; margin-bottom: 0.5rem;">مستشعر الضوضاء</h4>
+                            <p style="font-size: 0.9rem; color: #d1d5db;">يقيس مستوى الزحمة المرورية</p>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 1rem; text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 0.8rem;">💨</div>
+                            <h4 style="font-weight: bold; margin-bottom: 0.5rem;">مستشعر الغازات</h4>
+                            <p style="font-size: 0.9rem; color: #d1d5db;">MQ-135 لقياس التلوث</p>
+                        </div>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 1rem;">
+                        <h4 style="font-size: 1.3rem; font-weight: bold; margin-bottom: 1rem; text-align: center;">🎯 أهداف التنمية المستدامة</h4>
+                        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                            <div style="background: rgba(59, 130, 246, 0.2); padding: 1rem; border-radius: 0.8rem; text-align: center;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏥</div>
+                                <p style="font-weight: bold;">الهدف 3</p>
+                                <p style="font-size: 0.9rem; color: #d1d5db;">صحة جيدة ورفاهية</p>
+                            </div>
+                            <div style="background: rgba(16, 185, 129, 0.2); padding: 1rem; border-radius: 0.8rem; text-align: center;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏙️</div>
+                                <p style="font-weight: bold;">الهدف 11</p>
+                                <p style="font-size: 0.9rem; color: #d1d5db;">مدن مستدامة</p>
+                            </div>
+                            <div style="background: rgba(168, 85, 247, 0.2); padding: 1rem; border-radius: 0.8rem; text-align: center;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌍</div>
+                                <p style="font-weight: bold;">الهدف 13</p>
+                                <p style="font-size: 0.9rem; color: #d1d5db;">العمل المناخي</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: 'الإجراءات',
+                category: 'Procedures',
+                icon: '⚙️',
+                colors: { start: '#8b5cf6', end: '#6366f1' },
+                content: `
+                    <h3 class="content-title">كيف يعمل النظام؟</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="card" style="border-color: rgba(139, 92, 246, 0.5); border-right: 4px solid #8b5cf6;">
+                            <h4 class="card-title">1️⃣ تركيب المستشعرات</h4>
+                            <p class="card-text">• مستشعر صوت (KY-038) لكشف صفارة الإسعاف<br>
+                            • مستشعر ضوضاء لقياس مستوى الزحمة<br>
+                            • مستشعر غازات (MQ-135) لقياس CO و NOx</p>
+                        </div>
+                        <div class="card" style="border-color: rgba(99, 102, 241, 0.5); border-right: 4px solid #6366f1;">
+                            <h4 class="card-title">2️⃣ تحليل البيانات</h4>
+                            <p class="card-text">نظام تحكم ذكي يحلل إشارات المستشعرات في الوقت الفعلي باستخدام الذكاء الاصطناعي</p>
+                        </div>
+                        <div class="card" style="border-color: rgba(59, 130, 246, 0.5); border-right: 4px solid #3b82f6;">
+                            <h4 class="card-title">3️⃣ فتح الطريق تلقائياً</h4>
+                            <p class="card-text">عند اكتشاف إسعاف أو زحمة، يفتح النظام الطريق الجانبي (Curve) لتسهيل المرور</p>
+                        </div>
+                        <div class="card" style="border-color: rgba(16, 185, 129, 0.5); border-right: 4px solid #10b981;">
+                            <h4 class="card-title">4️⃣ توجيه المرور</h4>
+                            <p class="card-text">شاشات إلكترونية ترشد السائقين + كاميرات رادار لتسجيل المخالفات</p>
+                        </div>
+                        <div class="card" style="border-color: rgba(245, 158, 11, 0.5); border-right: 4px solid #f59e0b;">
+                            <h4 class="card-title">5️⃣ العودة للوضع الطبيعي</h4>
+                            <p class="card-text">بعد مرور الإسعاف، يغلق النظام الطريق الجانبي ويعود كل شيء لطبيعته</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: 'المحاكاة التفاعلية',
+                category: 'Simulation',
+                icon: '🎮',
+                colors: { start: '#a855f7', end: '#ec4899' },
+                isSimulation: true
+            },
+            {
+                title: 'التطبيقات',
+                category: 'Applications',
+                icon: '🚀',
+                colors: { start: '#06b6d4', end: '#3b82f6' },
+                content: `
+                    <h3 class="content-title">تطبيقات النظام في الحياة الواقعية</h3>
+                    <div class="grid grid-2">
+                        <div class="card" style="border-color: rgba(6, 182, 212, 0.5);">
+                            <h4 class="card-title">🚑 إدارة الطوارئ</h4>
+                            <ul style="list-style: none; padding: 0;">
+                                <li class="list-item">• تسريع وصول الإسعافات للمستشفيات</li>
+                                <li class="list-item">• إنقاذ الأرواح في الحالات الحرجة</li>
+                                <li class="list-item">• تحسين كفاءة الاستجابة للطوارئ</li>
+                            </ul>
+                        </div>
+                        <div class="card" style="border-color: rgba(59, 130, 246, 0.5);">
+                            <h4 class="card-title">🚦 إدارة المرور الذكية</h4>
+                            <ul style="list-style: none; padding: 0;">
+                                <li class="list-item">• تقليل الازدحام بنسبة 40%</li>
+                                <li class="list-item">• توفير الوقت والوقود</li>
+                                <li class="list-item">• تحسين تجربة القيادة</li>
+                            </ul>
+                        </div>
+                        <div class="card" style="border-color: rgba(16, 185, 129, 0.5);">
+                            <h4 class="card-title">🌱 حماية البيئة</h4>
+                            <ul style="list-style: none; padding: 0;">
+                                <li class="list-item">• تقليل الانبعاثات بنسبة 35%</li>
+                                <li class="list-item">• طلاء TiO₂ لتنقية الهواء</li>
+                                <li class="list-item">• مراقبة جودة الهواء لحظياً</li>
+                            </ul>
+                        </div>
+                        <div class="card" style="border-color: rgba(168, 85, 247, 0.5);">
+                            <h4 class="card-title">📱 المدن الذكية</h4>
+                            <ul style="list-style: none; padding: 0;">
+                                <li class="list-item">• التكامل مع أنظمة المدينة</li>
+                                <li class="list-item">• تطبيق موبايل للسائقين</li>
+                                <li class="list-item">• تحليل البيانات للتخطيط</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: 'الخطط المستقبلية',
+                category: 'Future Plans',
+                icon: '🔮',
+                colors: { start: '#f59e0b', end: '#ef4444' },
+                content: `
+                    <h3 class="content-title">رؤيتنا المستقبلية</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="card" style="border-color: rgba(245, 158, 11, 0.5); border-right: 4px solid #f59e0b;">
+                            <h4 class="card-title">🤖 تحليل السلوك بالذكاء الاصطناعي</h4>
+                            <p class="card-text">تطوير نظام يتعلم أنماط القيادة ويتنبأ بالزحمة قبل حدوثها</p>
+                        </div>
+                        <div class="card" style="border-color: rgba(239, 68, 68, 0.5); border-right: 4px solid #ef4444;">
+                            <h4 class="card-title">📡 اتصال مباشر مع الإسعافات</h4>
+                            <p class="card-text">السماح للإسعافات بإرسال إشارات تلقائية للنظام عند الاقتراب</p>
+                        </div>
+                        <div class="card" style="border-color: rgba(236, 72, 153, 0.5); border-right: 4px solid #ec4899;">
+                            <h4 class="card-title">🎨 تقنية الطلاء الذكي</h4>
+                            <p class="card-text">طلاء تفاعلي يغير لونه أو يصدر تحذيرات ضوئية عند اقتراب الإسعاف</p>
+                        </div>
+                        <div class="card" style="border-color: rgba(168, 85, 247, 0.5); border-right: 4px solid #a855f7;">
+                            <h4 class="card-title">📱 تطبيق موبايل</h4>
+                            <p class="card-text">إشعارات فورية للسائقين عن حركة الإسعافات والطرق البديلة</p>
+                        </div>
+                        <div class="card" style="border-color: rgba(234, 179, 8, 0.5); background: linear-gradient(135deg, rgba(234, 179, 8, 0.3), rgba(245, 158, 11, 0.3)); margin-top: 1rem;">
+                            <p style="font-size: 1.3rem; font-weight: bold; text-align: center;">🚀 هدفنا: مدن أكثر أماناً واستدامة وذكاءً!</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: 'المراجع',
+                category: 'Resources',
+                icon: '📚',
+                colors: { start: '#6366f1', end: '#8b5cf6' },
+                content: `
+                    <h3 class="content-title">المصادر والمراجع العلمية</h3>
+                    <ul class="reference-list">
+                        <li class="reference-item">
+                            <p class="reference-authors">Neelakandan, S., Berlin, M. A., Tripathi, S., Devi, V. B., Bhardwaj, I., & Arulkumar, N.</p>
+                            <p class="reference-title">IoT-based traffic prediction and traffic signal control system for smart city</p>
+                            <p class="reference-details">Soft computing, 25(18), 12241-12248. (2021)</p>
+                            <a href="https://link.springer.com/article/10.1007/s00500-021-05896-x" target="_blank" class="reference-link">🔗 رابط المصدر</a>
+                        </li>
+                        <li class="reference-item">
+                            <p class="reference-authors">Construction and Building Materials</p>
+                            <p class="reference-title">Titanium dioxide as a photocatalyst [Abstract]</p>
+                            <p class="reference-details">Volume 36, Pages 9-15. (2012)</p>
+                            <a href="https://doi.org/10.1016/j.conbuildmat.2012.08.011" target="_blank" class="reference-link">🔗 رابط المصدر</a>
+                        </li>
+                        <li class="reference-item">
+                            <p class="reference-authors">Ghaffarzadegan, S., Bondi, L., Lin, W.-C., Kumar, A., Wu, H.-H., Horst, H.-G., & Das, S.</p>
+                            <p class="reference-title">Sound of Traffic: A Dataset for Acoustic Traffic Identification and Counting</p>
+                            <p class="reference-details">Proceedings of Interspeech 2024. (2024)</p>
+                            <a href="https://doi.org/10.21437/Interspeech.2024-1205" target="_blank" class="reference-link">🔗 رابط المصدر</a>
+                        </li>
+                        <li class="reference-item">
+                            <p class="reference-authors">Naizabayeva, L., Zaitov, D., & Seilova, N.</p>
+                            <p class="reference-title">Integrating smart traffic systems with real-time air quality monitoring to minimize emissions and improve urban health</p>
+                            <p class="reference-details">Procedia Computer Science, 251, 603–608. (2024)</p>
+                            <a href="https://doi.org/10.1016/j.procs.2024.11.156" target="_blank" class="reference-link">🔗 رابط المصدر</a>
+                        </li>
+                    </ul>
+                `
+            }
+        ];
+
+        function updateSlide() {
+            const slide = slides[currentSlide];
+            
+            document.getElementById('slideCategory').textContent = slide.category;
+            document.getElementById('slideIcon').textContent = slide.icon;
+            document.getElementById('slideTitle').textContent = slide.title;
+            document.getElementById('slideNumber').textContent = `صفحة ${currentSlide + 1} من ${slides.length}`;
+            
+            const header = document.getElementById('slideHeader');
+            header.style.setProperty('--color-start', slide.colors.start);
+            header.style.setProperty('--color-end', slide.colors.end);
+            
+            const contentDiv = document.getElementById('slideContent');
+            if (slide.isSimulation) {
+                contentDiv.innerHTML = createSimulation();
+                setupSimulation();
+            } else {
+                contentDiv.innerHTML = slide.content;
+            }
+            
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === slides.length - 1;
+            
+            updateProgress();
+        }
+
+        function createSimulation() {
+            return `
+                <h3 class="content-title">شاهد النظام في العمل - Distance & Displacement</h3>
+                
+                <div class="metrics">
+                    <div class="metric-card" style="border-color: rgba(59, 130, 246, 0.5);">
+                        <p class="metric-label">Distance المسافة</p>
+                        <p class="metric-value" id="distanceValue">500</p>
+                        <p class="metric-unit">متر - المسافة الكلية</p>
+                    </div>
+                    <div class="metric-card" style="border-color: rgba(168, 85, 247, 0.5);">
+                        <p class="metric-label">Displacement الإزاحة</p>
+                        <p class="metric-value" id="displacementValue">0</p>
+                        <p class="metric-unit">متر - المسافة المستقيمة</p>
+                    </div>
+                    <div class="metric-card" id="statusCard" style="border-color: rgba(16, 185, 129, 0.5);">
+                        <p class="metric-label">حالة الطريق</p>
+                        <p class="metric-value" id="statusValue">🔒 مغلق</p>
+                        <p class="metric-unit" id="statusText">طبيعي</p>
+                    </div>
+                </div>
+
+                <div class="road-simulation">
+                    <div class="main-road">
+                        <div class="lane">
+                            <div class="lane-marker" style="top: 10%;"></div>
+                            <div class="lane-marker" style="top: 30%;"></div>
+                            <div class="lane-marker" style="top: 50%;"></div>
+                            <div class="lane-marker" style="top: 70%;"></div>
+                            <div class="lane-marker" style="top: 90%;"></div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-marker" style="top: 10%;"></div>
+                            <div class="lane-marker" style="top: 30%;"></div>
+                            <div class="lane-marker" style="top: 50%;"></div>
+                            <div class="lane-marker" style="top: 70%;"></div>
+                            <div class="lane-marker" style="top: 90%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="curve-road">
+                        <svg width="120" height="250" style="position: absolute;">
+                            <path id="curvePath"
+                                d="M 0 0 Q 60 125 0 250"
+                                fill="none"
+                                stroke="#374151"
+                                stroke-width="50"
+                                class="curve-path"
+                            />
+                        </svg>
+                    </div>
+
+                    <div class="gate">
+                        <div class="gate-bar" id="gateBar"></div>
+                        <div class="gate-label" id="gateLabel">✕ مغلق</div>
+                    </div>
+
+                    <div class="arrow-indicator" id="arrowIndicator">
+                        <span style="font-size: 1.5rem;">→</span>
+                        <span>العربيات تدخل هنا</span>
+                    </div>
+
+                    <div id="carsContainer"></div>
+                    <div id="ambulanceContainer"></div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" id="startBtn" onclick="startSimulation()">
+                        <span>▶</span>
+                        <span>بدء المحاكاة</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetSimulation()">
+                        <span>↻</span>
+                        <span>إعادة تعيين</span>
+                    </button>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-card" style="border-color: rgba(59, 130, 246, 0.5);">
+                        <h4 class="info-title">📏 Distance - المسافة</h4>
+                        <p class="info-text">المسافة الكلية التي يقطعها الإسعاف = 500 متر</p>
+                    </div>
+                    <div class="info-card" style="border-color: rgba(168, 85, 247, 0.5);">
+                        <h4 class="info-title">📍 Displacement - الإزاحة</h4>
+                        <p class="info-text">الإزاحة = المسافة المستقيمة من نقطة البداية للنهاية</p>
+                    </div>
+                    <div class="info-card" style="border-color: rgba(16, 185, 129, 0.5);">
+                        <h4 class="info-title">🚪 فتح البوابة</h4>
+                        <p class="info-text">عند اقتراب الإسعاف (250م)، تفتح البوابة والعربيات تدخل الـ Curve الملاصق</p>
+                    </div>
+                    <div class="info-card" style="border-color: rgba(239, 68, 68, 0.5);">
+                        <h4 class="info-title">✅ إغلاق البوابة</h4>
+                        <p class="info-text">بعد عبور الإسعاف، تغلق البوابة والعربيات تخرج وتكمل طبيعي</p>
+                    </div>
+                </div>
+
+                <div class="sensor-grid">
+                    <div class="sensor-card">
+                        <div class="sensor-header">
+                            <span style="color: #fbbf24;">📊</span>
+                            <span>مستوى الضوضاء</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span style="font-size: 1.5rem; font-weight: bold;" id="noiseValue">45</span>
+                            <span style="color: #9ca3af; font-size: 0.9rem;">ديسيبل</span>
+                        </div>
+                        <div class="sensor-bar">
+                            <div class="sensor-bar-fill" id="noiseBar" style="width: 45%; background: #10b981;"></div>
+                        </div>
+                    </div>
+                    <div class="sensor-card">
+                        <div class="sensor-header">
+                            <span style="color: #a78bfa;">💨</span>
+                            <span>مستوى الغازات</span>
+                        </div>
+                        <div class="sensor-value">
+                            <span style="font-size: 1.5rem; font-weight: bold;" id="gasValue">120</span>
+                            <span style="color: #9ca3af; font-size: 0.9rem;">PPM</span>
+                        </div>
+                        <div class="sensor-bar">
+                            <div class="sensor-bar-fill" id="gasBar" style="width: 34%; background: #10b981;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setupSimulation() {
+            resetSimulation();
+            renderCars();
+        }
+
+        function renderCars() {
+            const container = document.getElementById('carsContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            cars.forEach(car => {
+                const carDiv = document.createElement('div');
+                carDiv.className = 'car' + (car.inCurve ? ' in-curve' : '');
+                carDiv.id = `car-${car.id}`;
+                carDiv.style.top = car.pos + '%';
+                
+                if (car.inCurve) {
+                    carDiv.style.left = `calc(50% + ${100 + car.curveProgress}px)`;
+                    carDiv.style.transform = `translateX(-50%) rotate(${car.curveProgress * 0.3}deg)`;
+                }
+                
+                container.appendChild(carDiv);
+            });
+        }
+
+        function renderAmbulance() {
+            const container = document.getElementById('ambulanceContainer');
+            if (!container) return;
+            
+            if (ambulancePosition < 110) {
+                container.innerHTML = `
+                    <div class="ambulance" style="bottom: ${ambulancePosition}%;">
+                        <div class="ambulance-label">🚨 ${ambulanceDistance > 0 ? ambulanceDistance.toFixed(0) + 'م' : 'عابر'}</div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = '';
+            }
+        }
+
+        function startSimulation() {
+            if (isSimulating) return;
+            
+            isSimulating = true;
+            document.getElementById('startBtn').disabled = true;
+            
+            ambulancePosition = -10;
+            ambulanceDistance = 500;
+            ambulanceDisplacement = 0;
+            gateOpen = false;
+            noiseLevel = 85;
+            gasLevel = 120;
+            
+            updateMetrics();
+            renderAmbulance();
+            
+            simulationInterval = setInterval(() => {
+                ambulancePosition += 1.2;
+                ambulanceDistance = Math.max(0, ambulanceDistance - 6);
+                ambulanceDisplacement += 6;
+                
+                if (ambulanceDistance <= 250 && !gateOpen) {
+                    openGate();
+                    moveCarsToCoerve();
+                }
+                
+                if (ambulancePosition >= 95 && gateOpen) {
+                    setTimeout(() => {
+                        closeGate();
+                        moveCarsFromCurve();
+                    }, 500);
+                }
+                
+                if (ambulancePosition >= 110) {
+                    setTimeout(() => {
+                        stopSimulation();
+                    }, 2000);
+                }
+                
+                updateMetrics();
+                renderAmbulance();
+            }, 50);
+        }
+
+        function stopSimulation() {
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+            }
+            isSimulating = false;
+            document.getElementById('startBtn').disabled = false;
+            noiseLevel = 45;
+            gasLevel = 120;
+            updateMetrics();
+        }
+
+        function resetSimulation() {
+            stopSimulation();
+            ambulancePosition = -10;
+            ambulanceDistance = 500;
+            ambulanceDisplacement = 0;
+            gateOpen = false;
+            noiseLevel = 45;
+            gasLevel = 120;
+            cars = [
+                { id: 1, pos: 20, inCurve: false, curveProgress: 0 },
+                { id: 2, pos: 35, inCurve: false, curveProgress: 0 },
+                { id: 3, pos: 50, inCurve: false, curveProgress: 0 },
+                { id: 4, pos: 65, inCurve: false, curveProgress: 0 }
+            ];
+            
+            if (document.getElementById('ambulanceContainer')) {
+                document.getElementById('ambulanceContainer').innerHTML = '';
+            }
+            renderCars();
+            updateMetrics();
+        }
+
+        function openGate() {
+            gateOpen = true;
+            const gateBar = document.getElementById('gateBar');
+            const gateLabel = document.getElementById('gateLabel');
+            const arrowIndicator = document.getElementById('arrowIndicator');
+            const curvePath = document.getElementById('curvePath');
+            
+            if (gateBar) gateBar.classList.add('open');
+            if (gateLabel) gateLabel.textContent = '✓ مفتوح';
+            if (arrowIndicator) arrowIndicator.classList.add('show');
+            if (curvePath) curvePath.style.stroke = '#10b981';
+        }
+
+        function closeGate() {
+            gateOpen = false;
+            const gateBar = document.getElementById('gateBar');
+            const gateLabel = document.getElementById('gateLabel');
+            const arrowIndicator = document.getElementById('arrowIndicator');
+            const curvePath = document.getElementById('curvePath');
+            
+            if (gateBar) gateBar.classList.remove('open');
+            if (gateLabel) gateLabel.textContent = '✕ مغلق';
+            if (arrowIndicator) arrowIndicator.classList.remove('show');
+            if (curvePath) curvePath.style.stroke = '#374151';
+        }
+
+        function moveCarsToCoerve() {
+            cars.forEach(car => {
+                car.inCurve = true;
+            });
+            
+            let progress = 0;
+            const curveInterval = setInterval(() => {
+                progress += 3;
+                cars.forEach(car => {
+                    car.curveProgress = progress;
+                });
+                renderCars();
+                
+                if (progress >= 40) {
+                    clearInterval(curveInterval);
+                }
+            }, 40);
+        }
+
+        function moveCarsFromCurve() {
+            let progress = 40;
+            const exitInterval = setInterval(() => {
+                progress -= 4;
+                cars.forEach(car => {
+                    car.curveProgress = Math.max(0, progress);
+                    if (progress <= 0) {
+                        car.inCurve = false;
+                    }
+                });
+                renderCars();
+                
+                if (progress <= 0) {
+                    clearInterval(exitInterval);
+                }
+            }, 40);
+        }
+
+        function updateMetrics() {
+            const distanceEl = document.getElementById('distanceValue');
+            const displacementEl = document.getElementById('displacementValue');
+            const statusCard = document.getElementById('statusCard');
+            const statusValue = document.getElementById('statusValue');
+            const statusText = document.getElementById('statusText');
+            const noiseValueEl = document.getElementById('noiseValue');
+            const noiseBarEl = document.getElementById('noiseBar');
+            const gasValueEl = document.getElementById('gasValue');
+            const gasBarEl = document.getElementById('gasBar');
+            
+            if (distanceEl) distanceEl.textContent = Math.round(ambulanceDistance);
+            if (displacementEl) displacementEl.textContent = Math.round(ambulanceDisplacement);
+            
+            if (statusCard && statusValue && statusText) {
+                if (gateOpen) {
+                    statusCard.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+                    statusCard.style.animation = 'pulse 0.5s infinite';
+                    statusValue.textContent = '🚪 مفتوح';
+                    statusText.textContent = ambulanceDistance > 0 ? 'إسعاف قادم' : 'إسعاف عابر';
+                } else {
+                    statusCard.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+                    statusCard.style.animation = 'none';
+                    statusValue.textContent = '🔒 مغلق';
+                    statusText.textContent = 'طبيعي';
+                }
+            }
+            
+            if (noiseValueEl) noiseValueEl.textContent = Math.round(noiseLevel);
+            if (noiseBarEl) {
+                const noisePercent = (noiseLevel / 100) * 100;
+                noiseBarEl.style.width = noisePercent + '%';
+                noiseBarEl.style.background = noiseLevel > 70 ? '#ef4444' : '#10b981';
+            }
+            
+            if (gasValueEl) gasValueEl.textContent = Math.round(gasLevel);
+            if (gasBarEl) {
+                const gasPercent = (gasLevel / 350) * 100;
+                gasBarEl.style.width = gasPercent + '%';
+                gasBarEl.style.background = gasLevel > 250 ? '#ef4444' : '#10b981';
+            }
+        }
+
+        function updateProgress() {
+            const progressBar = document.getElementById('progressBar');
+            const navDots = document.getElementById('navDots');
+            
+            progressBar.innerHTML = '';
+            navDots.innerHTML = '';
+            
+            for (let i = 0; i < slides.length; i++) {
+                const progressItem = document.createElement('div');
+                progressItem.className = 'progress-item';
+                if (i === currentSlide) {
+                    progressItem.classList.add('active');
+                } else if (i < currentSlide) {
+                    progressItem.classList.add('completed');
+                }
+                progressBar.appendChild(progressItem);
+                
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                if (i === currentSlide) {
+                    dot.classList.add('active');
+                }
+                dot.onclick = () => {
+                    currentSlide = i;
+                    updateSlide();
+                };
+                navDots.appendChild(dot);
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                if (e.key === 'ArrowRight') {
+                    previousSlide();
+                } else {
+                    nextSlide();
+                }
+            }
+        });
+
+        updateSlide();
+    </script>
+</body>
+</html>
